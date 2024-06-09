@@ -9,16 +9,8 @@ from flask_socketio import SocketIO, emit
 from cards import *
 from logic import *
 
-app = Flask(__name__, static_url_path="/static")
+app = Flask(__name__, static_folder="static/", static_url_path="/")
 socketio = SocketIO(app)
-
-
-@app.route("/favicon.ico")
-def favicon():
-    return send_from_directory(
-        os.path.join(app.root_path, "static"), "favicon.ico", mimetype="image/vnd.microsoft.icon"
-    )
-
 
 def render_cards(cards: list) -> str:
     form = """
@@ -129,7 +121,7 @@ def render_cards(cards: list) -> str:
 
     </script>
     <style>
-    @font-face {font-family:Cabin ; src:url('static/Cabin-Bold.ttf')}
+    @font-face {font-family:Cabin ; src:url('Cabin-Bold.ttf')}
     body {
         background-color: #555555;
         height: 100%;
@@ -161,7 +153,7 @@ def render_cards(cards: list) -> str:
     """
     for card in game.all_cards:
         form += f"""
-<button name="{card.get_description()}" onclick="useCard({card.id})" id="{card.id}" class="card" style="background:{card.color.value}; display: {'none' if not card in cards else 'block'}"><img src="static/{card.get_image()}" alt="{card.get_description()}" style="width: 66px;height: 100px;"></button>"""
+<button name="{card.get_description()}" onclick="useCard({card.id})" id="{card.id}" class="card" style="background:{card.color.value}; display: {'none' if not card in cards else 'block'}"><img src="{card.get_image()}" alt="{card.get_description()}" style="width: 66px;height: 100px;"></button>"""
     form += "</div>"
     form += """<script type="text/javascript" charset="utf-8">
         disableAll();
@@ -217,4 +209,4 @@ def index():
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, host="127.0.0.1", port=8080, debug=True, use_reloader=True, log_output=True)
+    socketio.run(app=app, host="::", port=8080, debug=True, use_reloader=True, log_output=True, ssl_context="adhoc")
