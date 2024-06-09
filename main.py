@@ -209,4 +209,4 @@ def index():
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, host="::", port=8080, debug=True, use_reloader=True, log_output=True, ssl_context="adhoc")
+    socketio.run(app=app, host="::", port=8080, debug=True, use_reloader=True, log_output=True)
