@@ -8,12 +8,12 @@ from cards import *
 class Game:
     """Object to save the state of the current game"""
 
-    cards: dict[str, list] = {}
     discard_pile = []
     draw_pile = []
     all_cards = []
     draw_number = 0
     # TODO(Cdr): Merge into one
+    cards: dict[str, list] = {} # user_id: cards
     users:dict[str,str] = {} # user_id: username
     leaderboard: dict[str, int] = {} # user_id: score
 
