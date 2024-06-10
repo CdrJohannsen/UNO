@@ -144,7 +144,7 @@ def render_cards(cards: list) -> str:
         text-align:center;
         justify-content:center;
     }
-    button {
+    .ui_button {
         background-color: highlight;
         font-family:Cabin;
         color: white;
@@ -153,8 +153,12 @@ def render_cards(cards: list) -> str:
         padding: 5px;
         padding-left: 10px;
         padding-right: 10px;
+        transition: scale 0.05s ease-out;
     }
-    button:disabled {
+    .ui_button:hover:enabled {
+        scale:1.1;
+    }
+    .ui_button:disabled {
         color:lightgray;
     }
     .card {
@@ -175,11 +179,11 @@ def render_cards(cards: list) -> str:
     }
     </style>
     
-    <p id="users"><button id="start_button" onclick="socket.emit('start');">Start</button></p>
+    <p id="users"><button id="start_button" class="ui_button" onclick="socket.emit('start');">Start</button></p>
     <br>
     <br style="line-height: 200px;">
     <br>
-    <button id="draw_button" onclick="drawCard()">Draw <span id="draw_counter"></span></button>
+    <button id="draw_button" class="ui_button" onclick="drawCard()">Draw <span id="draw_counter"></span></button>
     <br>
     <div style="display: flex; flex-wrap:wrap;justify-content:center;">
     """
