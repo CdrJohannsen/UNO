@@ -3,7 +3,7 @@ import os
 from hashlib import md5
 from time import time
 
-from flask import Flask, make_response, request, send_from_directory
+from flask import Flask, make_response, request
 from flask_socketio import SocketIO, emit
 
 from cards import *
@@ -11,6 +11,7 @@ from logic import *
 
 app = Flask(__name__, static_folder="static/", static_url_path="/")
 socketio = SocketIO(app)
+
 
 def render_cards(cards: list) -> str:
     form = """
@@ -103,7 +104,7 @@ def render_cards(cards: list) -> str:
             for (var key in users){
                 user_list.innerHTML += "<span id="+key+" style='margin:20px;'>"+users[key]+"</span>"
             }
-            document.getElementById(data.user_id).style.color = "#ffffff";
+            document.getElementById(data.user_id).style.color = "highlight";
             document.getElementById(getCookie("UserID")).style.textDecoration = "underline";
         })
 
@@ -122,8 +123,19 @@ def render_cards(cards: list) -> str:
     </script>
     <style>
     @font-face {font-family:Cabin ; src:url('Cabin-Bold.ttf')}
+    @media (prefers-color-scheme: dark) {
+        body {
+            background-color: #333333;
+            color: #ffffff;
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+    }
     body {
-        background-color: #555555;
         height: 100%;
         width: 100%;
         margin: 0px;
@@ -131,6 +143,19 @@ def render_cards(cards: list) -> str:
         font-size: 20px;
         text-align:center;
         justify-content:center;
+    }
+    button {
+        background-color: highlight;
+        font-family:Cabin;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 5px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    button:disabled {
+        color:lightgray;
     }
     .card {
         position: static;
@@ -140,6 +165,13 @@ def render_cards(cards: list) -> str:
         border-width: 2px;
         border-color: black;
         border-style: solid;
+        transition: margin 0.1s ease-out;
+    }
+    .card:enabled:hover {
+        background-color:black;
+        margin-top: -10px;
+        margin-bottom: 14px;
+
     }
     </style>
     
