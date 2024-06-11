@@ -31,7 +31,7 @@ card_id = 0
 
 
 class Card:
-    def __init__(self, color: CardColor | Enum, card_type: CardType | Enum, special: bool = False) -> None:
+    def __init__(self, color, card_type, special = False) -> None:
         self.color = color
         self.card_type = card_type
         self.is_special = special
@@ -48,5 +48,5 @@ class Card:
     def get_description(self):
         return f"{self.color.name}-{self.card_type.name}"
 
-    def __eq__(self, __value: object) -> bool:
+    def __eq__(self, __value) -> bool:
         return __value == self.id
