@@ -109,7 +109,7 @@ def render_cards() -> str:
             var user_list = document.getElementById("users");
             user_list.innerHTML = ""
             for (var key in users){
-                user_list.innerHTML += "<span id="+key+" style='margin:20px;'>"+users[key]+"</span>"
+                user_list.innerHTML += "<span id=user_"+key+" style='margin:20px;'>"+users[key]+"</span>"
             }
             document.getElementById(data.user_id).style.color = "highlight";
             var own_name = document.getElementById(socket.id)
@@ -239,8 +239,8 @@ document.head.appendChild(lock);
 @socketio.on("start")
 def handle_start():
     update_leaderboard()
-    emit("start", {"users": game.users}, broadcast=True)
-    for user_id in game.cards.keys():
+    emit("start", {"users": {user.id: user.name for user in game.users.values()}}, broadcast=True)
+    for user_id in game.users.keys():
         for i in range(10):
             draw_card(user_id)
     for i in range(len(game.draw_pile)):
@@ -254,7 +254,7 @@ def handle_start():
 @socketio.on("draw_card")
 def handle_draw_card():
     user_id = request.sid
-    for i in range(max(1, game.draw_number)):
+    for _ in range(max(1, game.draw_number)):
         draw_card(user_id)
     reset_draw()
 
@@ -267,17 +267,19 @@ def handle_card_use(json):
         emit("card_used", json, broadcast=True)
         play_card(user_id, json["id"])
 
+
 @socketio.on("connect")
 def handle_connect():
     user_id = request.sid
     if not user_id:
         return
-    game.cards[user_id] = []
-    game.leaderboard[user_id] = 0
-    game.users[user_id] = request.cookies.get("Username","Unknown")
+    game.users[user_id] = User(request.cookies.get("Username", "Unknown"))
     # for i in range(10):
-        # game.cards[user_id].append(game.draw_pile.pop())
-    print(f"[USER CONNECTED] username={game.users[user_id]}, ip={request.remote_addr}, {user_id=}, sid={request.sid}")
+    # game.cards[user_id].append(game.draw_pile.pop())
+    print(
+        f"[USER CONNECTED] username={game.users[user_id].name}, ip={request.remote_addr}, {user_id=}, sid={request.sid}"
+    )
+
 
 @app.route("/", methods=["GET"])
 def index():

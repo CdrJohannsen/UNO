@@ -31,7 +31,7 @@ card_id = 0
 
 
 class Card:
-    def __init__(self, color, card_type, special = False) -> None:
+    def __init__(self, color, card_type, special=False) -> None:
         self.color = color
         self.card_type = card_type
         self.is_special = special

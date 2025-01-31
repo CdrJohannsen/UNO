@@ -3,6 +3,7 @@ from random import shuffle
 from flask_socketio import emit
 
 from cards import *
+from user import User
 
 
 class Game:
@@ -12,10 +13,7 @@ class Game:
     draw_pile = []
     all_cards = []
     draw_number = 0
-    # TODO(Cdr): Merge into one
-    cards = {} # user_id: cards
-    users = {} # user_id: username
-    leaderboard = {} # user_id: score
+    users: dict[str, User] = {}
 
     def __init__(self) -> None:
         for color in list(CardColor._member_map_.values())[:-1]:
@@ -32,8 +30,8 @@ class Game:
 
     def reset(self):
         """Resets the game for a new round"""
-        for deck in self.cards.values():
-            deck.clear()
+        for user in self.users.values():
+            user.cards.clear()
         self.discard_pile.clear()
         self.draw_pile.clear()
         self.draw_number = 0
@@ -45,16 +43,15 @@ game = Game()
 
 
 def update_leaderboard():
-    leaderboard = dict(
-        sorted(zip(game.users.values(), game.leaderboard.values()), key=lambda item: item[1], reverse=True)
-    )
+    sorted_users = sorted(game.users.values(), key=lambda user: user.score, reverse=True)
+    leaderboard = {user.name: user.score for user in sorted_users}
     emit("update_leaderboard", leaderboard, broadcast=True)
 
 
 def trigger_won(user_id):
     """Handles updating the leaderboard and informing the clients about a winning user"""
     # TODO: Different scores for player counts > 2
-    game.leaderboard[user_id] += 1
+    game.users[user_id].score += 1
     update_leaderboard()
     emit("player_won", {"winner": user_id}, broadcast=True)
 
@@ -81,7 +78,7 @@ def increase_draw(n):
 
 def set_user(user_id):
     """Informs the clients about the new user"""
-    emit("set_user", {"user_id": user_id, "name": game.users[user_id]}, broadcast=True)
+    emit("set_user", {"user_id": user_id, "name": game.users[user_id].name}, broadcast=True)
 
 
 def set_next_user(user_id):
@@ -99,24 +96,25 @@ def draw_card(user_id):
     """Handles the drawing of cards, including refreshing the draw_pile"""
     # TODO: Check if draw_pile needs to be refilled
     drawn_card = game.draw_pile.pop()
-    game.cards[user_id].append(drawn_card)
+    game.users[user_id].cards.append(drawn_card)
     emit("receive_card", {"id": drawn_card.id}, to=user_id)
 
 
 def can_play_card(user_id, id):
     """Returns True if a card can be played else False"""
     # TODO: Check if card can be played
+    card = game.users[user_id].cards[game.users[user_id].cards.index(id)]
     return True
 
 
 def play_card(user_id, id):
     """Handles playing a card"""
-    card = game.cards[user_id].pop(game.cards[user_id].index(id))
+    card = game.users[user_id].cards.pop(game.users[user_id].cards.index(id))
     game.discard_pile.append(card)
     # TODO: Handle action cards and stuff
     if card.card_type == CardType.PlusFour:
         increase_draw(4)
-    if len(game.cards[user_id]) <= 0:
+    if len(game.users[user_id].cards) <= 0:
         trigger_won(user_id)
         trigger_game_over()
     set_next_user(user_id)
